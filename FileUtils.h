@@ -16,10 +16,12 @@
 #include <e32base.h>	// For CActive, link against: euser.lib
 //#include <e32std.h>
 #include <f32file.h>
+#include <aknprogressdialog.h> // For operation progress dialog
 
 // Forward declarations
 
 class MAsyncFileManObserver;
+class CFileOperationProgressDialog;
 
 // Classes
 
@@ -92,10 +94,11 @@ private:
 	CFileManExtended* iFileMan;
 	MAsyncFileManObserver* iObserver;
 	TBool iCancelOperation; // Used for cancel current operation in file manager
+	CFileOperationProgressDialog* iProgressDlg;
 	
 public:
 	// ToDo: Add other operations (rename, copy, etc...)
-	TInt Delete(const TDesC& aName, TUint aSwitch=0);
+	TInt Delete(const TDesC& aName, TUint aSwitch=0, TBool aShowProgressDlg=EFalse);
 	
 	inline TInt ProcessedFiles() { return iFileMan->ProcessedFiles(); };
 	inline TInt TotalFiles() { return iFileMan->TotalFiles(); };
@@ -111,5 +114,56 @@ public:
 	virtual MFileManObserver::TControl OnFileManEnded();
 	virtual void OnFileManFinished(TInt aStatus);
 	};
+
+
+// File operation progress dialog
+class CFileOperationProgressDialog : public CBase
+	{
+private:
+//	typedef void ( /*CTrackListBoxView::*/*ProgressDialogEventHandler )( 
+//			CAknProgressDialog* aProgressDialog );
+//	
+//	/**
+//	 * This is a helper class for progress/wait dialog callbacks. It routes the dialog's
+//	 * cancel notification to the handler function for the cancel event.
+//	 */
+//	class CProgressDialogCallback : public CBase, public MProgressDialogCallback
+//		{ 
+//		public:
+//			CProgressDialogCallback( 
+//					CTrackListBoxView* aHandlerObj, 
+//					CAknProgressDialog* aDialog, 
+//					ProgressDialogEventHandler aHandler ) :
+//				handlerObj( aHandlerObj ), dialog( aDialog ), handler( aHandler )
+//				{}
+//				
+//			void DialogDismissedL( TInt aButtonId ) 
+//				{
+//				( handlerObj->*handler )( dialog );
+//				}
+//		private:
+//			CTrackListBoxView* handlerObj;
+//			CAknProgressDialog* dialog;
+//			ProgressDialogEventHandler handler;
+//		};
+//		
+	
+	CAknProgressDialog* iDlg; // Operation progress dialog
+//	CProgressDialogCallback* iCallback; // Callback for cancel dialog 
+	CPeriodic* iRefreshTimer; // For periodically refresh progress bar position
+public:
+//	CFileOperationProgressDialog();
+	~CFileOperationProgressDialog();
+	
+	void ExecuteDlgL();
+		
+	// If called from Cancel callback, anExceptDialog must be set to ETrue, because
+	// the dialog already has been destroyed by ui framework
+	void RemoveDlgL(TBool anExceptDialog=EFalse);
+	static TInt UpdateProgress(TAny* anObject);
+	};
+
+
+
 
 #endif // FILEUTILS_H

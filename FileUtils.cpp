@@ -10,6 +10,11 @@
 
 #include "FileUtils.h"
 #include "Logger.h"
+#include <eikprogi.h> // For CEikProgressInfo
+////////////
+//#include <eikenv.h>
+////////////
+#include "FileUtils.rsg"
 
 
 // FileUtils
@@ -117,6 +122,10 @@ void CAsyncFileMan::DoCancel()
 	DEBUG(_L("Operation goes to cancell"));
 	iCancelOperation = ETrue;
 	
+	// Destroy progress window if shown
+	if (iProgressDlg != NULL)
+		delete iProgressDlg;
+	
 	// When cancelling, RunL won`t be called later,
 	// therefore call observer`s method here 
 	iObserver->OnFileManFinished(KErrCancel);
@@ -125,6 +134,10 @@ void CAsyncFileMan::DoCancel()
 void CAsyncFileMan::RunL()
 	{
 	DEBUG(_L("RunL status=%d"), iStatus.Int());
+	
+	// Destroy progress window if shown
+	if (iProgressDlg != NULL)
+		delete iProgressDlg;
 	
 	iObserver->OnFileManFinished(iStatus.Int());
 	}
@@ -173,12 +186,18 @@ MFileManObserver::TControl CAsyncFileMan::NotifyFileManEnded()
 	return iObserver->OnFileManEnded();
 	}
 
-TInt CAsyncFileMan::Delete(const TDesC& aName, TUint aSwitch)
+TInt CAsyncFileMan::Delete(const TDesC& aName, TUint aSwitch, TBool aShowProgressDlg)
 	{
 	//Cancel();
 	if (IsActive())
 		return KErrInUse;
 	iCancelOperation = EFalse;
+	if (aShowProgressDlg)
+		{
+		iProgressDlg = new (ELeave) CFileOperationProgressDialog;
+		iProgressDlg->ExecuteDlgL();
+		}
+		
 	TInt r = iFileMan->Delete(aName, aSwitch, iStatus); // ToDo: Check r
 	SetActive();
 	INFO(_L("Delete operation started"));
@@ -206,4 +225,108 @@ MFileManObserver::TControl MAsyncFileManObserver::OnFileManEnded()
 void MAsyncFileManObserver::OnFileManFinished(TInt /*aStatus*/)
 	{
 	
+	}
+
+
+
+// CFileOperationProgressDialog
+
+//CFileOperationProgressDialog::CFileOperationProgressDialog()
+//	{
+//	
+//	}
+
+CFileOperationProgressDialog::~CFileOperationProgressDialog()
+	{
+	TRAP_IGNORE(RemoveDlgL());
+	}
+
+void CFileOperationProgressDialog::ExecuteDlgL()
+	{
+	//////////////
+	///CEikonEnv::Static()->InfoMsg(_L("ExecuteDlgL"));
+	//////////////
+	
+	if (iDlg == NULL)
+		{
+		//DEBUG(_L("Execute tracks deletion dialog"));
+		
+		// Initialization of progress dialog
+		iDlg = new (ELeave) CAknProgressDialog(REINTERPRET_CAST(CEikDialog**, &iDlg));
+		iDlg->PrepareLC(R_FILE_OPERATION_PROGRESS_DIALOG);
+		//CEikProgressInfo* progressInfo = iDlg->GetProgressInfoL();
+		//CGPSTrackerAppUi* appUi = static_cast<CGPSTrackerAppUi *>(AppUi());
+		/*TInt totalCount = appUi->iAsyncFileMan->TotalFiles(); // equals to 0
+		progressInfo->SetFinalValue(totalCount);*/
+		iDlg->RunLD();
+		}
+	
+//	if  (iCallback == NULL)
+//		{
+//		// Dialog callback for cancel
+//		iCallback = new (ELeave) CProgressDialogCallback(this,
+//				iDlg, &HandleDialogCanceledL);
+//		iDlg->SetCallback(iCallback);
+//		}
+		
+	if (iRefreshTimer == NULL)
+		{
+		// Starts periodic progress bar update
+		const TInt KSecond = 1000000;
+		TTimeIntervalMicroSeconds32 updateInterval = KSecond / 5;
+		TCallBack callback(UpdateProgress, this);
+		iRefreshTimer = CPeriodic::NewL(EPriorityNormal);
+		iRefreshTimer->Start(0 /*updateInterval*/, updateInterval, callback);
+		}
+	}
+
+void CFileOperationProgressDialog::RemoveDlgL(TBool anExceptDialog)
+	{
+	//////////////
+	//CEikonEnv::Static()->InfoMsg(_L("RemoveDlgL"));
+	//////////////
+	
+	// Dialog
+	if (!anExceptDialog)
+		{
+		if (iDlg != NULL)
+			{
+			//DEBUG(_L("Remove tracks deletion dialog"));
+			
+			iDlg->SetCallback(NULL);
+			iDlg->ProcessFinishedL();
+			iDlg = NULL;
+			}
+		}
+		
+//	// Dialog cancel callback
+//	delete iCallback;
+//	iCallback = NULL;
+	
+	// Progress refresh timer
+	if (iRefreshTimer != NULL)
+		{
+		iRefreshTimer->Cancel();
+		delete iRefreshTimer;
+		iRefreshTimer = NULL;
+		}
+	}
+
+TInt CFileOperationProgressDialog::UpdateProgress(TAny* anObject)
+	{	
+//	if (iDlg == NULL)
+//		return (TInt) ETrue;
+//	
+//	CEikProgressInfo* progressInfo = NULL;
+//	TRAPD(r, progressInfo = iDlg->GetProgressInfoL());
+//	if (r == KErrNone && progressInfo != NULL)
+//		{
+//		TInt totalCount = /*iAsyncFileMan->TotalFiles()*/ 100;
+//		progressInfo->SetFinalValue(totalCount); // ToDo: May be done one time after deletion started
+//		
+//		TInt processedCount = /*iAsyncFileMan->ProcessedFiles()*/ 50;
+//		progressInfo->SetAndDraw(processedCount);
+//		}
+//	
+//	return (TInt) ETrue;
 	}
