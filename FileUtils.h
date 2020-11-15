@@ -112,4 +112,21 @@ public:
 	virtual void OnFileManFinished(TInt aStatus);
 	};
 
+
+/*
+ * Used for store large number of files in tree structure  
+ */
+class CFileTreeMapper : public CBase
+	{
+private:
+	TFileName iBaseDir;
+	
+public:
+	CFileTreeMapper(const TDesC &aBaseDir);
+	/*~CFileTreeMapper();*/
+	
+	void GetFilePath(const TDesC &anOriginalFileName, TFileName &aFilePath);
+	};
+
+
 #endif // FILEUTILS_H

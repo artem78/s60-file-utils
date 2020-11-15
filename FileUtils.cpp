@@ -207,3 +207,18 @@ void MAsyncFileManObserver::OnFileManFinished(TInt /*aStatus*/)
 	{
 	
 	}
+
+
+// CFileTreeMapper
+
+CFileTreeMapper::CFileTreeMapper(const TDesC &aBaseDir)
+	{
+	iBaseDir.Copy(aBaseDir);
+	}
+
+void CFileTreeMapper::GetFilePath(const TDesC &anOriginalFileName, TFileName &aFilePath)
+	{
+	aFilePath.Zero();
+	aFilePath.Append(iBaseDir);
+	aFilePath.Append(anOriginalFileName);
+	}
