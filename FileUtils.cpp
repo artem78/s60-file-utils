@@ -10,6 +10,7 @@
 
 #include "FileUtils.h"
 #include "Logger.h"
+//#include <baflutils.h>
 
 
 // FileUtils
@@ -211,14 +212,93 @@ void MAsyncFileManObserver::OnFileManFinished(TInt /*aStatus*/)
 
 // CFileTreeMapper
 
-CFileTreeMapper::CFileTreeMapper(const TDesC &aBaseDir)
+typedef TBuf8<MD5_HASH> TFileNameHash;
+
+
+CFileTreeMapper::CFileTreeMapper(const TDesC &aBaseDir, TInt aLevels,
+		TInt aSubdirNameLength, TBool aPreserveOriginalFileName) :
+		
+		iLevels(aLevels),
+		iSubdirNameLength(aSubdirNameLength),
+		iPreserveOriginalFileName(aPreserveOriginalFileName)
 	{
 	iBaseDir.Copy(aBaseDir);
 	}
 
+CFileTreeMapper::~CFileTreeMapper()
+	{
+	delete iMd5;
+	}
+
+CFileTreeMapper* CFileTreeMapper::NewLC(const TDesC &aBaseDir, TInt aLevels,
+		TInt aSubdirNameLength, TBool aPreserveOriginalFileName)
+	{
+	CFileTreeMapper* self = new (ELeave) CFileTreeMapper(aBaseDir, aLevels,
+			aSubdirNameLength, aPreserveOriginalFileName);
+	CleanupStack::PushL(self);
+	self->ConstructL();
+	return self;
+	}
+
+CFileTreeMapper* CFileTreeMapper::NewL(const TDesC &aBaseDir, TInt aLevels,
+		TInt aSubdirNameLength, TBool aPreserveOriginalFileName)
+	{
+	CFileTreeMapper* self = CFileTreeMapper::NewLC(aBaseDir, aLevels,
+			aSubdirNameLength, aPreserveOriginalFileName);
+	CleanupStack::Pop(); // self;
+	return self;
+	}
+
+void CFileTreeMapper::ConstructL()
+	{
+	iMd5 = CMD5::NewL();
+	}
+
+void CFileTreeMapper::CalculateHash(const TDesC/*8*/ &aSrc, TFileNameHashBuff &aHash)
+	{
+	TPtrC8 srcPtr8((const TUint8*)aSrc.Ptr(),aSrc.Size());
+	iMd5->Update(srcPtr8);
+	TFileNameHash hash;
+	hash.Copy(iMd5->Final());
+	
+	aHash.Zero();
+	// Convert bytes to HEX string
+	for (TInt i = 0; i < hash.Length(); i++)
+		aHash.AppendNum(hash[i], EHex);
+	}
+
 void CFileTreeMapper::GetFilePath(const TDesC &anOriginalFileName, TFileName &aFilePath)
 	{
+	TFileNameHashBuff hash;
+	CalculateHash(anOriginalFileName, hash);
+	
 	aFilePath.Zero();
 	aFilePath.Append(iBaseDir);
-	aFilePath.Append(anOriginalFileName);
+	
+	// Subdirs
+	//TPtrC8 subdirName;
+	TBuf<10> subdirName;
+	for (TInt level = 1; level <= iLevels; level++)
+		{
+		TInt pos = (level - 1) * iSubdirNameLength;
+		//subdirName.Set(hash.Mid(pos, iSubdirNameLength));
+		subdirName.Copy(hash.Mid(pos, iSubdirNameLength));
+		aFilePath.Append(subdirName);
+		aFilePath.Append(KPathDelimiter);
+		}
+	//aFilePath.Append(KPathDelimiter);
+	//BaflUtils::EnsurePathExistsL(aFilePath);
+
+	// Filename
+	if (iPreserveOriginalFileName)
+		aFilePath.Append(anOriginalFileName);
+	else
+		{
+		TFileName newFileName;
+		TInt pos = iLevels * iSubdirNameLength;
+		TInt len = hash.Length() - pos;
+		newFileName.Copy(hash.Mid(pos, len));
+		aFilePath.Append(newFileName);
+		// ToDo: What about file extension?
+		}
 	}

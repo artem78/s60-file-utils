@@ -16,6 +16,11 @@
 #include <e32base.h>	// For CActive, link against: euser.lib
 //#include <e32std.h>
 #include <f32file.h>
+#include "hash.h"
+
+// Types
+
+typedef TBuf8<MD5_HASH * 2> TFileNameHashBuff;
 
 // Forward declarations
 
@@ -118,13 +123,28 @@ public:
  */
 class CFileTreeMapper : public CBase
 	{
+public:
+	~CFileTreeMapper();
+	static CFileTreeMapper* NewL(const TDesC &aBaseDir, TInt aLevels = 2,
+			TInt aSubdirNameLength = 2, TBool aPreserveOriginalFileName = EFalse);
+	static CFileTreeMapper* NewLC(const TDesC &aBaseDir, TInt aLevels = 2,
+			TInt aSubdirNameLength = 2, TBool aPreserveOriginalFileName = EFalse);
+
+private:
+	CFileTreeMapper(const TDesC &aBaseDir, TInt aLevels, TInt aSubdirNameLength,
+			TBool aPreserveOriginalFileName);
+	void ConstructL();
+	
 private:
 	TFileName iBaseDir;
+	TInt iLevels;           // ToDo: Check range (min=1, max=???)
+	TInt iSubdirNameLength; // ToDo: Check range (min=1, max=???)
+	TBool iPreserveOriginalFileName;
+	CMD5* iMd5;
 	
-public:
-	CFileTreeMapper(const TDesC &aBaseDir);
-	/*~CFileTreeMapper();*/
+	void CalculateHash(const TDesC/*8*/ &aSrc, TFileNameHashBuff &aHash);
 	
+public:	
 	void GetFilePath(const TDesC &anOriginalFileName, TFileName &aFilePath);
 	};
 
