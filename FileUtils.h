@@ -44,6 +44,10 @@ public:
 	static CFileManExtended* NewL(RFs& aFs);
 	static CFileManExtended* NewL(RFs& aFs,MFileManObserver* anObserver);
 	
+protected:
+	CFileManExtended(RFs& anFs);	
+	
+public:
 // New methods
 	inline TInt ProcessedFiles() { return iNumberOfFilesProcessed; };
 	inline TInt TotalFiles() { return iDirList != NULL ? iDirList->Count() : 0; };

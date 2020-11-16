@@ -63,6 +63,12 @@ void FileUtils::FileSizeToReadableString(/*TUint64*/ TInt aBytes, TDes &aDes)
 
 // 	CFileManExtended
 
+CFileManExtended::CFileManExtended(RFs& anFs) :
+		CFileMan(anFs)
+	{
+	
+	}
+
 CFileManExtended* CFileManExtended::NewL(RFs& aFs)
 	{
 	// Just change class of returned pointer from parent
