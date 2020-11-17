@@ -25,18 +25,22 @@ void FileUtils::FileSizeToReadableString(/*TUint64*/ TInt aBytes, TDes &aDes)
 	
 	TReal size;
 	TPtrC unit;
-	TRealFormat realFmt;
-	realFmt.iType = KRealFormatFixed | KDoNotUseTriads;
-	//realFmt.iPoint = '.';
-	realFmt.iPlaces = /*1*/ 2;
-	realFmt.iTriLen = 0;
-	realFmt.iWidth = KDefaultRealWidth;
+//	/* Note: For unknown reason method with real format stopped work in another project.
+//	   Therefore use Format() instead. */
+//	TRealFormat realFmt;
+//	realFmt.iType = KRealFormatFixed | KDoNotUseTriads;
+//	//realFmt.iPoint = '.';
+//	realFmt.iPlaces = /*1*/ 2;
+//	realFmt.iTriLen = 0;
+//	realFmt.iWidth = KDefaultRealWidth;
+	TBool hasFractionalPart = ETrue;
 	
 	if (aBytes < KKilo)
 		{ // Bytes
 		size = aBytes;
 		unit.Set(KBytesUnit);
-		realFmt.iPlaces = 0;
+//		realFmt.iPlaces = 0;
+		hasFractionalPart = EFalse;
 		}
 	else if (aBytes < KMega)
 		{ // Kilobytes
@@ -54,10 +58,15 @@ void FileUtils::FileSizeToReadableString(/*TUint64*/ TInt aBytes, TDes &aDes)
 		unit.Set(KGigaBytesUnit);
 		}
 	
-	aDes.Zero();
-	aDes.Num(size, realFmt);
-	aDes.Append(' ');
-	aDes.Append(unit);	
+//	aDes.Zero();
+//	aDes.Num(size, realFmt);
+//	aDes.Append(' ');
+//	aDes.Append(unit);	
+	
+	_LIT(KFmtInt, "%.0f %S");
+	_LIT(KFmtReal, "%.2f %S");
+	TPtrC fmt(hasFractionalPart ? KFmtReal : KFmtInt);
+	aDes.Format(fmt, size, &unit);
 	}
 
 
