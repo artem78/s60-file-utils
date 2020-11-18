@@ -120,16 +120,20 @@ TInt FileUtils::DoDirectoryStats(RFs &aFs, const TDesC &aDir, TDirStats &aDirSta
 
 // 	CFileManExtended
 
-CFileManExtended* CFileManExtended::NewL(RFs& aFs)
+CFileManExtended::CFileManExtended(RFs& aFs, MFileManObserver* anObserver) :
+		CFileMan(aFs)
 	{
-	// Just change class of returned pointer from parent
-	return static_cast<CFileManExtended*>(CFileMan::NewL(aFs));
+	if (anObserver != NULL)
+		SetObserver(anObserver);
 	}
 
-CFileManExtended* CFileManExtended::NewL(RFs& aFs,MFileManObserver* anObserver)
+CFileManExtended* CFileManExtended::NewL(RFs& aFs, MFileManObserver* anObserver)
 	{
-	// Just change class of returned pointer from parent
-	return static_cast<CFileManExtended*>(CFileMan::NewL(aFs, anObserver));
+	CFileManExtended* self = new (ELeave) CFileManExtended(aFs, anObserver);
+	CleanupStack::PushL(self);
+	self->ConstructL();
+	CleanupStack::Pop(); // self;
+	return self;
 	}
 
 

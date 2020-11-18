@@ -50,12 +50,15 @@ private:
 // Wrapper for provide public access to some protected members of CFileMan class  
 class CFileManExtended : public CFileMan
 	{
-public:
 // Constructors / destructors
-	static CFileManExtended* NewL(RFs& aFs);
-	static CFileManExtended* NewL(RFs& aFs,MFileManObserver* anObserver);
+public:
+	static CFileManExtended* NewL(RFs& aFs, MFileManObserver* anObserver=NULL);
+	
+protected:
+	CFileManExtended(RFs& aFs, MFileManObserver* anObserver=NULL);
 	
 // New methods
+public:
 	inline TInt ProcessedFiles() { return iNumberOfFilesProcessed; };
 	inline TInt TotalFiles() { return iDirList != NULL ? iDirList->Count() : 0; };
 	};
