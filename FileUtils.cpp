@@ -69,6 +69,54 @@ void FileUtils::FileSizeToReadableString(/*TUint64*/ TInt aBytes, TDes &aDes)
 	aDes.Format(fmt, size, &unit);
 	}
 
+TInt FileUtils::DirectoryStats(RFs &aFs, const TDesC &aDir, TDirStats &aDirStats)
+	{
+	// Set zeros initial values before recursion start
+	aDirStats.iFilesCount = 0;
+	aDirStats.iSize = 0;
+	
+	// Start recursive call
+	/*TInt r =*/ DoDirectoryStats(aFs, aDir, aDirStats);
+	
+	return KErrNone;
+	}
+
+TInt FileUtils::DoDirectoryStats(RFs &aFs, const TDesC &aDir, TDirStats &aDirStats)
+	{
+	CDir* dirItems = NULL;
+	TInt r = aFs.GetDir(aDir, KEntryAttDir | KEntryAttNormal | KEntryAttHidden
+			| KEntryAttSystem, ESortNone, dirItems);
+	if (r == KErrNone && dirItems != NULL)
+		{
+		for (TInt i = 0; i < dirItems->Count(); i++)
+			{
+			const TEntry &entry = (*dirItems)[i];
+			
+			if (entry.IsDir())
+				{ // Directory
+				RBuf dir;
+				dir.Create(KMaxFileName);
+				dir.Copy(aDir);
+				TParsePtr parser(dir);
+				parser.AddDir(entry.iName);
+				/*TInt r =*/ DoDirectoryStats(aFs, parser.FullName(), aDirStats);
+				dir.Close();
+				}
+			else
+				{ // File
+				aDirStats.iFilesCount++;
+				aDirStats.iSize += entry.iSize;
+				}
+			}
+		
+		delete dirItems;
+		
+		return KErrNone;
+		}
+	else
+		return r or KErrUnknown;
+	}
+
 
 // 	CFileManExtended
 

@@ -28,11 +28,22 @@ class MAsyncFileManObserver;
 
 // Classes
 
+class TDirStats
+	{
+public:
+	TInt iFilesCount; // Total amount of files in directory
+	//TInt iDirsCount;
+	TInt iSize; // Total size of all files in bytes
+	};
+
 class FileUtils
 	{
 public:
 	static void FileSizeToReadableString(/*TUint64*/ TInt aBytes, TDes &aDes);
-
+	static TInt DirectoryStats(RFs &aFs, const TDesC &aDir, TDirStats &aDirStats);
+	
+private:
+	static TInt DoDirectoryStats(RFs &aFs, const TDesC &aDir, TDirStats &aDirStats);
 	};
 
 
