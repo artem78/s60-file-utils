@@ -120,6 +120,7 @@ TInt FileUtils::DoDirectoryStats(RFs &aFs, const TDesC &aDir, TDirStats &aDirSta
 
 // 	CFileManExtended
 
+#ifdef WINSCW
 CFileManExtended* CFileManExtended::NewL(RFs& aFs)
 	{
 	// Just change class of returned pointer from parent
@@ -131,6 +132,7 @@ CFileManExtended* CFileManExtended::NewL(RFs& aFs,MFileManObserver* anObserver)
 	// Just change class of returned pointer from parent
 	return static_cast<CFileManExtended*>(CFileMan::NewL(aFs, anObserver));
 	}
+#endif
 
 
 // CAsyncFileMan
@@ -158,7 +160,11 @@ CAsyncFileMan* CAsyncFileMan::NewL(RFs &aFs, MAsyncFileManObserver* aObserver)
 
 void CAsyncFileMan::ConstructL(RFs &aFs)
 	{	
+#ifdef WINSCW
 	iFileMan = CFileManExtended::NewL(aFs, this);
+#else
+	iFileMan = CFileMan::NewL(aFs, this);
+#endif
 	
 	CActiveScheduler::Add(this); // Add to scheduler
 	}
