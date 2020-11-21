@@ -71,6 +71,8 @@ void FileUtils::FileSizeToReadableString(/*TUint64*/ TInt aBytes, TDes &aDes)
 
 TInt FileUtils::DirectoryStats(RFs &aFs, const TDesC &aDir, TDirStats &aDirStats)
 	{
+	// ToDo: Make asynchronous or find quicker way without loop over all files 
+	
 	// Set zeros initial values before recursion start
 	aDirStats.iFilesCount = 0;
 	aDirStats.iSize = 0;
