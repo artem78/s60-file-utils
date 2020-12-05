@@ -175,6 +175,8 @@ private:
 	
 public:	
 	void GetFilePath(const TDesC &anOriginalFileName, TFileName &aFilePath);
+	inline void SetBaseDir(const TDesC &aBaseDir)
+		{ iBaseDir.Copy(aBaseDir); };
 	};
 
 
