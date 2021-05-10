@@ -61,6 +61,9 @@ private:
 public:
 	inline TInt ProcessedFiles() { return iNumberOfFilesProcessed; };
 	inline TInt TotalFiles() { return iDirList != NULL ? iDirList->Count() : 0; };
+	
+	/* FixMe: When delete files recursively, TotalFiles() returns amount of files
+	          ONLY in current processing dir, but not total count */
 	};
 
 
