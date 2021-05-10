@@ -2,7 +2,7 @@
  ============================================================================
  Name		: FileUtils.h
  Author	  : artem78
- Version	 : 1.0
+ Version	 : 2.0
  Copyright   : 
  Description : Collection of file utilites
  ============================================================================
