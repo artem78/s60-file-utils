@@ -4,7 +4,7 @@
  Author	  : artem78
  Version	 : 2.0.1
  Copyright   : 
- Description : Collection of file utilites
+ Description : Collection of file utilities
  ============================================================================
  */
 
