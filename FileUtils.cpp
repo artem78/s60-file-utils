@@ -119,6 +119,16 @@ TInt FileUtils::DoDirectoryStats(RFs &aFs, const TDesC &aDir, TDirStats &aDirSta
 		return r or KErrUnknown;
 	}
 
+char FileUtils::InstallationDrive()
+	{
+	// Get drive from current process (path to exe)
+	RProcess proc;
+	TFileName procPath = proc.FileName();
+	TParse parser;
+	parser.Set(procPath, NULL, NULL);
+	return parser.Drive()[0]; // Drop semicolon
+	}
+
 
 // 	CFileManExtended
 
