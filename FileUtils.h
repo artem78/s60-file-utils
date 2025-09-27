@@ -39,7 +39,7 @@ public:
 class FileUtils
 	{
 public:
-	static void FileSizeToReadableString(/*TUint64*/ TInt aBytes, TDes &aDes);
+	static void FileSizeToReadableString(TUint64 aBytes, TDes &aDes);
 	static TInt DirectoryStats(RFs &aFs, const TDesC &aDir, TDirStats &aDirStats);
 	
 	// Returns drive letter where program is installed (i.e. drive of EXE)

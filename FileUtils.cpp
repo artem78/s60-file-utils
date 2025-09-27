@@ -15,7 +15,7 @@
 
 // FileUtils
 
-void FileUtils::FileSizeToReadableString(/*TUint64*/ TInt aBytes, TDes &aDes)
+void FileUtils::FileSizeToReadableString(TUint64 aBytes, TDes &aDes)
 	{
 	_LIT(KBytesUnit, "B");
 	_LIT(KKiloBytesUnit, "KB");
