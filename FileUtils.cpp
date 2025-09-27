@@ -21,13 +21,15 @@ void FileUtils::FileSizeToReadableString(TUint64 aBytes, TDes &aDes)
 	_LIT(KKiloBytesUnit, "KB");
 	_LIT(KMegaBytesUnit, "MB");
 	_LIT(KGigaBytesUnit, "GB");
+	_LIT(KTeraBytesUnit, "TB");
 	
 	typedef TBuf<2> TUnitName;
-	TFixedArray<TUnitName, 4> units;
+	TFixedArray<TUnitName, 5> units;
 	units[0] = KBytesUnit;
 	units[1] = KKiloBytesUnit;
 	units[2] = KMegaBytesUnit;
 	units[3] = KGigaBytesUnit;
+	units[4] = KTeraBytesUnit;
 	
 	TUint64 factor(1);
 	factor <<= 10 * units.Count();
