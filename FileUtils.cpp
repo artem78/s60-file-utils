@@ -21,51 +21,33 @@ void FileUtils::FileSizeToReadableString(TUint64 aBytes, TDes &aDes)
 	_LIT(KKiloBytesUnit, "KB");
 	_LIT(KMegaBytesUnit, "MB");
 	_LIT(KGigaBytesUnit, "GB");
-	const TInt KGiga = 1024 * KMega;
 	
-	TReal size;
+	typedef TBuf<2> TUnitName;
+	TFixedArray<TUnitName, 4> units;
+	units[0] = KBytesUnit;
+	units[1] = KKiloBytesUnit;
+	units[2] = KMegaBytesUnit;
+	units[3] = KGigaBytesUnit;
+	
+	TUint64 factor(1);
+	factor <<= 10 * units.Count();
+	
 	TPtrC unit;
-//	/* Note: For unknown reason method with real format stopped work in another project.
-//	   Therefore use Format() instead. */
-//	TRealFormat realFmt;
-//	realFmt.iType = KRealFormatFixed | KDoNotUseTriads;
-//	//realFmt.iPoint = '.';
-//	realFmt.iPlaces = /*1*/ 2;
-//	realFmt.iTriLen = 0;
-//	realFmt.iWidth = KDefaultRealWidth;
-	TBool hasFractionalPart = ETrue;
-	
-	if (aBytes < KKilo)
-		{ // Bytes
-		size = aBytes;
-		unit.Set(KBytesUnit);
-//		realFmt.iPlaces = 0;
-		hasFractionalPart = EFalse;
-		}
-	else if (aBytes < KMega)
-		{ // Kilobytes
-		size = (TReal)aBytes / KKilo;
-		unit.Set(KKiloBytesUnit);
-		}
-	else if (aBytes < KGiga)
-		{ // Megabytes
-		size = (TReal)aBytes / KMega;
-		unit.Set(KMegaBytesUnit);
-		}
-	else
-		{ // Gigabytes
-		size = (TReal)aBytes / KGiga;
-		unit.Set(KGigaBytesUnit);
+	for (TInt i = units.Count() - 1; i >= 0; i--)
+		{
+		unit.Set(units[i]);
+		factor >>= 10;
+		
+		if (aBytes >= factor)
+			break;
 		}
 	
-//	aDes.Zero();
-//	aDes.Num(size, realFmt);
-//	aDes.Append(' ');
-//	aDes.Append(unit);	
+	TReal size = (TReal) aBytes / factor;
 	
 	_LIT(KFmtInt, "%.0f %S");
 	_LIT(KFmtReal, "%.2f %S");
-	TPtrC fmt(hasFractionalPart ? KFmtReal : KFmtInt);
+	TPtrC fmt(/*unit == KBytesUnit*/ factor == 1 ? KFmtInt : KFmtReal);
+	
 	aDes.Format(fmt, size, &unit);
 	}
 
