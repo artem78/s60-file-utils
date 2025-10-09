@@ -113,6 +113,39 @@ char FileUtils::InstallationDrive()
 	return parser.Drive()[0]; // Drop semicolon
 	}
 
+TBool FileUtils::IsDriveWritable(RFs &aFs, TDriveNumber aDrive)
+	{
+	//RFs fs = CCoeEnv::Static()->FsSession();
+	
+	TDriveList drvList;
+	if (aFs.DriveList(drvList) != KErrNone)
+		return EFalse;
+	
+	if (!drvList[aDrive])
+		return EFalse;
+	
+	TVolumeInfo volInfo;
+	if (aFs.Volume(volInfo, aDrive) != KErrNone)
+		return EFalse;
+	
+	switch (volInfo.iDrive.iType)
+		{
+		case EMediaHardDisk:
+		case EMediaFlash:
+		case EMediaNANDFlash:
+		case EMediaRam: // ???
+			break;
+		
+		default:
+			return EFalse;
+		};
+	
+	if (volInfo.iDrive.iMediaAtt & KMediaAttWriteProtected)
+		return EFalse;
+	
+	return ETrue;
+	}
+
 
 // 	CFileManExtended
 

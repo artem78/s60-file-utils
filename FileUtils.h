@@ -45,6 +45,8 @@ public:
 	// Returns drive letter where program is installed (i.e. drive of EXE)
 	static char InstallationDrive();
 	
+	static TBool IsDriveWritable(RFs &aFs, TDriveNumber aDrive);
+	
 private:
 	static TInt DoDirectoryStats(RFs &aFs, const TDesC &aDir, TDirStats &aDirStats);
 	};
