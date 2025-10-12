@@ -178,7 +178,7 @@ TBool FileUtils::IsDriveWritable(RFs &aFs, TDriveNumber aDrive)
 	return ETrue;
 	}
 
-TDriveNumber FileUtils::BiggestDrive(RFs &aFs)
+TDriveNumber FileUtils::BiggestDrive(RFs &aFs, TBool aIgnoreRam)
 	{
 	TDriveNumber maxDrv = EDriveA;
 	TInt64 maxDrvSize = 0; 
@@ -190,6 +190,9 @@ TDriveNumber FileUtils::BiggestDrive(RFs &aFs)
 		
 		TVolumeInfo volInfo;
 		if (aFs.Volume(volInfo, driveNum) != KErrNone)
+			continue;
+		
+		if (volInfo.iDrive.iType == EMediaRam && aIgnoreRam)
 			continue;
 		
 #ifdef __WINSCW__
