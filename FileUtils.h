@@ -46,6 +46,7 @@ public:
 	static char InstallationDrive();
 	
 	static TBool IsDriveWritable(RFs &aFs, TDriveNumber aDrive);
+	static TDriveNumber BiggestDrive(RFs &aFs);
 	
 private:
 	static TInt DoDirectoryStats(RFs &aFs, const TDesC &aDir, TDirStats &aDirStats);

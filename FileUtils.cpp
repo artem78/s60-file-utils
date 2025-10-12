@@ -178,6 +178,41 @@ TBool FileUtils::IsDriveWritable(RFs &aFs, TDriveNumber aDrive)
 	return ETrue;
 	}
 
+TDriveNumber FileUtils::BiggestDrive(RFs &aFs)
+	{
+	TDriveNumber maxDrv = EDriveA;
+	TInt64 maxDrvSize = 0; 
+	
+	for (/*TDriveNumber*/ TInt driveNum = EDriveA; driveNum <= EDriveZ; driveNum++)
+		{
+		if (!FileUtils::IsDriveWritable(aFs, static_cast<TDriveNumber>(driveNum)))
+			continue;
+		
+		TVolumeInfo volInfo;
+		if (aFs.Volume(volInfo, driveNum) != KErrNone)
+			continue;
+		
+#ifdef __WINSCW__
+		TChar drvChar;
+		if (aFs.DriveToChar(driveNum, drvChar) != KErrNone) drvChar = '?';
+		TBuf<16> size, free;
+		FileUtils::FileSizeToReadableString(volInfo.iSize, size);
+		FileUtils::FileSizeToReadableString(volInfo.iFree, free);
+		DEBUG(_L("drive=%c (%d) size=%S free=%S"), (TUint)drvChar, driveNum,
+				&size, &free);
+#endif
+		
+		if (volInfo.iSize > maxDrvSize)
+			{
+			maxDrv = static_cast<TDriveNumber>(driveNum);
+			maxDrvSize = volInfo.iSize;
+			}
+		}
+	
+	DEBUG(_L("max drive=%d"), maxDrv);
+	return maxDrv;
+	}
+
 
 // 	CFileManExtended
 
