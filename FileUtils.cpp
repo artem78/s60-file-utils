@@ -128,6 +128,38 @@ TBool FileUtils::IsDriveWritable(RFs &aFs, TDriveNumber aDrive)
 	if (aFs.Volume(volInfo, aDrive) != KErrNone)
 		return EFalse;
 	
+#ifdef __WINSCW__
+	TChar drvChar;
+	if (aFs.DriveToChar(aDrive, drvChar) != KErrNone) drvChar = '?';
+	TBuf<32> type(KNullDesC);
+	switch (volInfo.iDrive.iType)
+		{
+		case EMediaNotPresent: type = _L("EMediaNotPresent");break;
+		case EMediaUnknown: type = _L("EMediaUnknown");break;
+		case EMediaFloppy: type = _L("EMediaFloppy");break;
+		case EMediaHardDisk: type = _L("EMediaHardDisk");break;
+		case EMediaCdRom: type = _L("EMediaCdRom");break;
+		case EMediaRam: type = _L("EMediaRam");break;
+		case EMediaFlash: type = _L("EMediaFlash");break;
+		case EMediaRom: type = _L("EMediaRom");break;
+		case EMediaRemote: type = _L("EMediaRemote");break;
+		case EMediaNANDFlash: type = _L("EMediaNANDFlash");break;
+		
+		
+		default:
+		break;
+		}
+	DEBUG(_L("drive=%c (#%d) type=%S mediaAtt=%b write protected=%d local=%d internal=%d removable=%d locaked=%d"),
+			(TUint)drvChar, aDrive,
+			&type, volInfo.iDrive.iMediaAtt,
+			(TInt)(volInfo.iDrive.iMediaAtt & KMediaAttWriteProtected),
+			(TInt)(volInfo.iDrive.iMediaAtt & KDriveAttLocal),
+			(TInt)(volInfo.iDrive.iMediaAtt & KDriveAttInternal),
+			(TInt)(volInfo.iDrive.iMediaAtt & KDriveAttRemovable),
+			(TInt)(volInfo.iDrive.iMediaAtt & KMediaAttLocked)
+	);
+#endif
+	
 	switch (volInfo.iDrive.iType)
 		{
 		case EMediaHardDisk:
