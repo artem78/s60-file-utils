@@ -17,6 +17,7 @@
 //#include <e32std.h>
 #include <f32file.h>
 #include "hash.h"
+#include <badesca.h>
 
 // Types
 
@@ -120,10 +121,13 @@ private:
 	CFileManExtended* iFileMan;
 	MAsyncFileManObserver* iObserver;
 	TBool iCancelOperation; // Used for cancel current operation in file manager
+	CDesCArray* iItemsQueue; /* queue for processed items
+				(used for array of directories in delete operation) */
 	
 public:
 	// ToDo: Add other operations (rename, copy, etc...)
 	TInt Delete(const TDesC& aName, TUint aSwitch=0);
+	TInt Delete(const CDesCArray* aDirectories, TUint aSwitch=0);
 
 	inline TInt ProcessedFiles() { return iFileMan->ProcessedFiles(); };
 	inline TInt TotalFiles() { return iFileMan->TotalFiles(); };

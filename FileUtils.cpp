@@ -260,10 +260,16 @@ void CAsyncFileMan::ConstructL(RFs &aFs)
 	iFileMan = CFileManExtended::NewL(aFs, this);
 	
 	CActiveScheduler::Add(this); // Add to scheduler
+	
+	const TInt KGranularity = 10;
+	iItemsQueue = new (ELeave) CDesCArraySeg(KGranularity);
 	}
 
 CAsyncFileMan::~CAsyncFileMan()
 	{
+	iItemsQueue->Reset();
+	delete iItemsQueue;
+	
 	Cancel(); // Cancel any request, if outstanding
 	
 	delete iFileMan;
@@ -283,7 +289,19 @@ void CAsyncFileMan::RunL()
 	{
 	DEBUG(_L("RunL status=%d"), iStatus.Int());
 	
-	iObserver->OnFileManFinished(iStatus.Int());
+	if (iItemsQueue->Count())
+		{
+		if (iFileMan->CurrentAction() == CFileMan::EDelete)
+			{
+			// process next item
+			Delete(/*iItemsQueue->At(0)*/ (*iItemsQueue)[0]);
+			iItemsQueue->Delete(0);
+			}
+		}
+	else
+		{
+		iObserver->OnFileManFinished(iStatus.Int());
+		}
 	}
 
 TInt CAsyncFileMan::RunError(TInt aError)
@@ -338,8 +356,20 @@ TInt CAsyncFileMan::Delete(const TDesC& aName, TUint aSwitch)
 	iCancelOperation = EFalse;
 	TInt r = iFileMan->Delete(aName, aSwitch, iStatus); // ToDo: Check r
 	SetActive();
-	INFO(_L("Delete operation started"));
+	INFO(_L("Delete operation started for \"%S\""), &aName);
 	return r;
+	}
+
+TInt CAsyncFileMan::Delete(const CDesCArray* aDirectories, TUint aSwitch)
+	{
+	iItemsQueue->Reset();
+	for (TInt i = 0; i < aDirectories->Count(); i++)
+		{
+		iItemsQueue->AppendL(/*aDirectories->At(i)*/ (*aDirectories)[i]);
+		}
+	
+	Delete(/*iItemsQueue->At(0)*/ (*aDirectories)[0], aSwitch);
+	iItemsQueue->Delete(0);
 	}
 
 
